@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'scala'
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: 'kotlin'
+
+group = 'com.andro'
+version = '1.0'
+
+description = """JMH benchmark sample: Java"""
+
+ext {
+    javaV = '1.8'
+    scalaV = '2.12.0'
+}
+
+
+compileJava {
+    //it.sourceCompatibility = ${project.ext.javaV}
+    //it.targetCompatibility = ${project.ext.javaV}
+    sourceCompatibility=project.javaV
+    targetCompatibility=project.javaV
+}
+
+buildscript {
+    ext.kotlin_version = '1.0.4'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4'
+    }
+}
+
+repositories {
+    maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+
+
+dependencies {
+    compile group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.15'
+    compile(group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.15')
+    compile "org.scala-lang:scala-library:${project.ext['scalaV']}"
+    compile "org.scala-lang:scala-compiler:${project.ext['scalaV']}"
+    compile localGroovy()
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+    compile group: 'junit', name: 'junit', version: '4.12'
+}
+
+task uber(type: Jar, dependsOn: [':compileGroovy', ':compileScala', 'compileKotlin', ':processResources']) { x ->
+    from(files(sourceSets.main.output.classesDir) + files(sourceSets.main.output.resourcesDir))
+    from(configurations.compile.asFileTree.files.collect { f ->
+        zipTree(f)
+    }) {
+        include '**/*'
+        exclude '**/*.DSA'
+        exclude '**/*.RSA'
+        exclude '**/*.SF'
+    }
+    manifest {
+        attributes 'Implementation-Title': project.artifactId,
+                'Main-Class': project.ext['cls'],
+                'Implementation-Version': project.version,
+                'JDK-Version': System.getProperty('java.version')
+    }
+}
