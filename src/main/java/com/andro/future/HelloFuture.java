@@ -1,14 +1,14 @@
 package com.andro.future;
 
-import org.junit.Test;
-
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 
 public class HelloFuture {
+
+    public <T> T test() {
+        T t = null;
+        return t;
+    }
 
    /* @Test
     public void test_accept_either_async_nested_finishes_first() throws Exception {
